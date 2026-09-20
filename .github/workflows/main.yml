@@ -1,0 +1,61 @@
+name: Poppy's Love
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v5
+
+      - name: Download Ren'Py
+        shell: pwsh
+        run: |
+          Invoke-WebRequest `
+            -Uri "https://www.renpy.org/dl/release/renpy-8.5.3-sdk.zip" `
+            -OutFile "renpy.zip"
+
+      - name: Extract Ren'Py
+        shell: pwsh
+        run: |
+          Expand-Archive -Path "renpy.zip" -DestinationPath "renpy-sdk"
+
+      - name: Build Windows game
+        shell: pwsh
+        run: |
+          $sdk = Get-ChildItem "renpy-sdk" -Directory | Select-Object -First 1
+
+          $python = Join-Path $sdk.FullName "lib\py3-windows-x86_64\python.exe"
+          $renpy = Join-Path $sdk.FullName "renpy.py"
+
+          New-Item -ItemType Directory -Force -Path "build-output"
+
+          Set-Location $sdk.FullName
+
+          & $python $renpy launcher distribute `
+            "${{ github.workspace }}" `
+            --destination "${{ github.workspace }}\build-output" `
+            --package pc
+
+      - name: Show build output
+        shell: pwsh
+        run: |
+          Write-Host "===== BUILD OUTPUT ====="
+          Get-ChildItem `
+            -Path "${{ github.workspace }}\build-output" `
+            -Recurse `
+            -File |
+            ForEach-Object {
+              Write-Host $_.FullName
+            }
+
+      - name: Upload Windows game
+        uses: actions/upload-artifact@v4
+        with:
+          name: Poppys-Love
+          path: "build-output/*"
+          if-no-files-found: error
