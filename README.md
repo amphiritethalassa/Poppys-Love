@@ -1,8 +1,7 @@
-# Poppys-Love
-This is a game created specifically for a user on Yumeshipper app, Rae.
 # Poppy's Love
-
 A small Ren'Py visual novel featuring Poppy.
+
+THIS GAME IS PERSONALIZED AND MEANT FOR A USER ON YUMESHIPPER APP.
 
 ## About
 
